@@ -1,0 +1,60 @@
+---
+title: "Associative Rules"
+author: "Durga Gaddam"
+date: "October 21, 2016"
+output: pdf_document
+---
+
+#### Objective
+
+The objective of this article is to explain how Apriori Algorithm is used in providin recommendations in market basket analysis and, customer purchasing behaviour.
+
+Support(X)= Count(X)/N
+
+confidence(X->Y)= Support(X,Y)/Support(X)
+
+
+```{r}
+
+###install.packages("arules")
+###install.packages("arulesViz")
+###install.packages("fpc")
+
+###library(arules)
+###library(arulesViz)
+require(arules)
+require(arulesViz)
+
+data("Groceries")
+
+summary(Groceries)
+class(Groceries)
+
+apply(Groceries@data[,10:20],2, function(r) paste(Groceries@itemInfo[r,"labels"], collapse=", "))
+
+
+itemsets <- apriori(Groceries, parameter = list(minlen=1, maxlen=1, support=0.02, target="frequent itemsets"))
+
+
+summary(itemsets)
+
+
+inspect(head(sort(itemsets, by = "support"),10))
+
+
+
+
+rules <- apriori(Groceries, parameter = list(support=0.001, confidence=0.6, target="rules"))
+
+plot(rules@quality)
+
+plot(rules)
+
+confidentRules <- rules[quality(rules)$confidence>0.9]
+confidentRules
+plot(confidentRules, method="matrix", measure=c("lift", "confidence"), control= list(reorder=TRUE))
+
+
+highLiftRules <- head(sort(rules, by="lift"),5)
+plot(highLiftRules, method = "graph", control = list(types="items"))
+```
